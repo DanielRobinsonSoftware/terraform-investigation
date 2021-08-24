@@ -1,4 +1,4 @@
-resource "azurerm_resource_group" "movie-match" {
+resource "azurerm_resource_group" "movie_match" {
   name     = var.RESOURCE_GROUP
   location = var.LOCATION
 }
@@ -12,7 +12,7 @@ resource "random_string" "random" {
 
 resource "azurerm_storage_account" "func_storage_acc" {
   name                     = "funcstorageacc${random_string.random.result}"
-  resource_group_name      = var.RESOURCE_GROUP
+  resource_group_name      = azurerm_resource_group.movie_match.name
   location                 = var.LOCATION
   account_tier             = "Standard"
   account_replication_type = "LRS"
@@ -28,7 +28,7 @@ resource "azurerm_storage_container" "func_storage_container" {
 module "func" {
   source                    = "./modules/func"
   LOCATION                  = var.LOCATION
-  RESOURCE_GROUP            = var.RESOURCE_GROUP
+  RESOURCE_GROUP            = azurerm_resource_group.movie_match.name
   STORAGE_ACC_NAME          = azurerm_storage_account.func_storage_acc.name
   STORAGE_ACC_KEY           = azurerm_storage_account.func_storage_acc.primary_access_key
   STORAGE_CONNECTION_STRING = azurerm_storage_account.func_storage_acc.primary_blob_connection_string
