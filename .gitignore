@@ -22,3 +22,6 @@
 **/[Rr]elease/
 **/[Bb]in/
 **/[Oo]bj/
+
+# Local settings
+**/local.settings.json
