@@ -96,9 +96,64 @@ resource "azurerm_function_app" "fxn" {
   }
 }
 
+
+##################################################################################
+# Key Vault
+##################################################################################
+
+#Create KeyVault ID
+resource "random_id" "key_vault_name" {
+  byte_length = 5
+  prefix      = "keyvault"
+}
+
+#Keyvault Creation
+resource "azurerm_key_vault" "keyvault" {
+  name                        = random_id.key_vault_name.hex
+  location                    = var.location
+  resource_group_name         = azurerm_resource_group.rg.name
+  enabled_for_disk_encryption = true
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  soft_delete_retention_days  = 7
+  purge_protection_enabled    = false
+
+  sku_name = "standard"
+
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    key_permissions = [
+      "get",
+    ]
+
+    secret_permissions = [
+      "get", "backup", "delete", "list", "purge", "recover", "restore", "set",
+    ]
+
+    storage_permissions = [
+      "get",
+    ]
+  }
+}
+
+#Create Key Vault Secret
+resource "azurerm_key_vault_secret" "movie_db_access_token" {
+  name         = "movie-db-access-token"
+  value        = var.movie_db_access_token
+  key_vault_id = azurerm_key_vault.keyvault.id
+}
+
 ##################################################################################
 # Role Assignments
 ##################################################################################
+// https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-secrets-user
+resource "azurerm_role_assignment" "functionToKeyVaultSecret1" {
+  scope                = azurerm_key_vault.keyvault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_function_app.fxn.identity[0].principal_id
+}
+
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-reader
 // allows for blobServices/generateUserDelegationKey and blobs/read
 resource "azurerm_role_assignment" "functionToStorage1" {
