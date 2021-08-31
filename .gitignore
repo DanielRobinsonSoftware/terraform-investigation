@@ -12,6 +12,9 @@
 # secrets
 **/*.tfvars
 
+# deployment scripts
+**/*.sh
+
 
 ### VS Code ###
 **/*.vscode
