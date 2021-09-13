@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -7,27 +9,46 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace MovieMatch
 {
-    public static class RestEndpoint
+    public class RestEndpoint
     {
+        // TODO: Move to base class
+        private readonly IConfiguration _configuration;
+        public RestEndpoint(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         [FunctionName("RestEndpoint")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            string name = req.Query["name"];
+            // TODO: Load configuration elsewhere and inject
+            var keyVaultUri = Environment.GetEnvironmentVariable("KeyVaultUri");
+            
+            var secretClient = new SecretClient(new Uri(keyVaultUri), new DefaultAzureCredential());
+            var secretResponse = await secretClient.GetSecretAsync("movie-db-access-token");            
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
+            string movieDbAccessToken = secretResponse.Value.Value;            
 
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
+            // TODO: Web call will go here
+            var responseMessage = await Task.Run(() =>
+            {
+                if (movieDbAccessToken.StartsWith("eyJhbGciOiJIUzI1NiJ9."))
+                {
+                    return "Retrieved access token";
+                }                
+                else 
+                {
+                    return "Was not able to retrieve access token";
+                }                
+            });
 
             return new OkObjectResult(responseMessage);
         }

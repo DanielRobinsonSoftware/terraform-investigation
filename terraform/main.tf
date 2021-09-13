@@ -83,14 +83,18 @@ resource "azurerm_function_app" "fxn" {
   storage_account_name       = azurerm_storage_account.fxnstor.name
   storage_account_access_key = azurerm_storage_account.fxnstor.primary_access_key
   version                   = "~3"
+
+  app_settings = {
+    "KeyVaultUri" = "${azurerm_key_vault.keyvault.vault_uri}"
+  }
+
   identity {
     type = "SystemAssigned"
   }
+
   lifecycle {
-    ignore_changes = [
-      app_settings
-    ]
   }
+
   tags = {
     environment = var.environment
   }
@@ -118,23 +122,25 @@ resource "azurerm_key_vault" "keyvault" {
   purge_protection_enabled    = false
 
   sku_name = "standard"
+}
 
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
+resource "azurerm_key_vault_access_policy" "keyvault_access_policy" {
+  key_vault_id         = azurerm_key_vault.keyvault.id
+  
+  tenant_id = data.azurerm_client_config.current.tenant_id
+  object_id = azurerm_function_app.fxn.identity.0.principal_id
 
-    key_permissions = [
-      "get",
-    ]
+  key_permissions = [
+    "get",
+  ]
 
-    secret_permissions = [
-      "get",
-    ]
+  secret_permissions = [
+    "get", "list",
+  ]
 
-    storage_permissions = [
-      "get",
-    ]
-  }
+  storage_permissions = [
+    "get",
+  ]
 }
 
 #Create Key Vault Secret
