@@ -146,7 +146,7 @@ resource "azurerm_key_vault_access_policy" "keyvault_access_policy" {
 #Create Key Vault Secret
 resource "azurerm_key_vault_secret" "movie_db_access_token" {
   name         = "movie-db-access-token"
-  value        = var.movie_db_access_token
+  value        = var.MOVIE_DB_ACCESS_TOKEN
   key_vault_id = azurerm_key_vault.keyvault.id
 }
 
