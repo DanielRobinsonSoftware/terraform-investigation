@@ -26,5 +26,5 @@ jobs:
         run: |          
           terraform init
           terraform validate
-          terraform refresh
+          terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/movie-match-rg
           terraform apply -auto-approve
