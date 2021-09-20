@@ -10,16 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       TF_VAR_MOVIE_DB_ACCESS_TOKEN: ${{ secrets.MOVIE_DB_ACCESS_TOKEN }}
 
-    steps:
-      - name: Login to Azure
-        uses: azure/login@v1
-        with: 
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-        
+    steps:      
       - name: Checkout source code
         uses: actions/checkout@v2
 
