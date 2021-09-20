@@ -22,14 +22,10 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
 
-      - name: Setup Terraform
+      - name: Deploy using Terraform
         uses: hashicorp/setup-terraform@v1
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+        working-directory: ./terraform
+        run: |        
+          terraform init
+          terraform validate
+          terraform apply -auto-approve
