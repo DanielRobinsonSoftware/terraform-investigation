@@ -23,7 +23,8 @@ jobs:
       - uses: hashicorp/setup-terraform@v1
       - name: Deploy using Terraform
         working-directory: ./terraform
-        run: |        
+        run: |          
           terraform init
           terraform validate
+          terraform refresh
           terraform apply -auto-approve
