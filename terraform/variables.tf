@@ -1,6 +1,4 @@
 # Secrets stored in .tfvars locally / Github secrets
-variable "ARM_SUBSCRIPTION_ID" {}
-variable "ARM_TENANT_ID" {}
 variable "MOVIE_DB_ACCESS_TOKEN" {}
 
 # Globals
