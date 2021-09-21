@@ -26,7 +26,5 @@ jobs:
         run: |          
           terraform init
           terraform validate
-          terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/movie-match-rg
-          terraform import azurerm_storage_account.storage_account /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/movie-match-rg/providers/Microsoft.Storage/storageAccounts/moviematch20210831
           terraform apply -auto-approve
          
